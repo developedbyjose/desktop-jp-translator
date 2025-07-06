@@ -18,6 +18,7 @@ const STATUS_MESSAGES = {
 const BUTTON_LABELS = {
   START_TRANSLATION: "Start Translation",
   STOP_TRANSLATION: "Stop Translation",
+  SELECT_CAPTION_AREA: "Select Caption Area",
   RESET: "Reset",
 };
 const DIALOG_TITLES = {

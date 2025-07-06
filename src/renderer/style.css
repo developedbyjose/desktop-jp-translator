@@ -26,6 +26,27 @@ body {
   font-weight: 400;
   cursor: pointer;
   margin-top: 16px;
+  transition: background-color 0.3s ease;
+}
+
+#btn-start-translation:hover {
+  background: #4cae4c;
+}
+
+#btn-start-translation.selection-mode {
+  background: #f0ad4e;
+}
+
+#btn-start-translation.selection-mode:hover {
+  background: #ec971f;
+}
+
+#btn-start-translation.stop-mode {
+  background: #d9534f;
+}
+
+#btn-start-translation.stop-mode:hover {
+  background: #c9302c;
 }
 
 #jp-status {

@@ -1,4 +1,8 @@
 const { TITLE, BUTTON_LABELS } = require("../shared/constant");
+const { ipcRenderer } = require("electron");
+
+let isSelectionMode = false;
+let overlayActive = false;
 
 window.addEventListener("DOMContentLoaded", () => {
   const appTitle = document.getElementById("jp-title");
@@ -11,13 +15,51 @@ window.addEventListener("DOMContentLoaded", () => {
   btnStartTranslationLabel.textContent = BUTTON_LABELS.START_TRANSLATION;
 
   const btnStartTranslation = document.getElementById("btn-start-translation");
-  btnStartTranslation.addEventListener("click", () => {
-    jpStatus.textContent = "Translation started!";
-    // Here you would typically call a function to start the translation process
+  btnStartTranslation.addEventListener("click", async () => {
+    if (!isSelectionMode && !overlayActive) {
+      // Start selection mode
+      jpStatus.textContent = "Click to select caption area...";
+      btnStartTranslationLabel.textContent = "Select Caption Area";
+      btnStartTranslation.className = "selection-mode";
+      isSelectionMode = true;
+
+      try {
+        const bounds = await ipcRenderer.invoke("start-selection");
+
+        if (bounds) {
+          // Selection was successful, create overlay
+          await ipcRenderer.invoke("create-overlay", bounds);
+          overlayActive = true;
+          btnStartTranslationLabel.textContent = "Stop Translation";
+          btnStartTranslation.className = "stop-mode";
+          jpStatus.textContent = "Monitoring caption area";
+        } else {
+          // Selection was cancelled
+          resetToInitialState();
+        }
+      } catch (error) {
+        console.error("Selection failed:", error);
+        resetToInitialState();
+      }
+
+      isSelectionMode = false;
+    } else if (overlayActive) {
+      // Stop translation and destroy overlay
+      await ipcRenderer.invoke("destroy-overlay");
+      resetToInitialState();
+    }
   });
 
   // status
   const jpStatus = document.getElementById("jp-status");
+
+  function resetToInitialState() {
+    isSelectionMode = false;
+    overlayActive = false;
+    btnStartTranslationLabel.textContent = BUTTON_LABELS.START_TRANSLATION;
+    btnStartTranslation.className = "";
+    jpStatus.textContent = "";
+  }
 
   // footer
   const footerDescription = document.querySelector(".footer-description");
