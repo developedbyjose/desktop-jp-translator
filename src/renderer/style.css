@@ -1,0 +1,47 @@
+body {
+  background: #f5f5f5;
+  font-family: Arial, sans-serif;
+}
+
+.jp-container {
+  flex-direction: column;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#jp-title {
+  font-weight: 600;
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+
+#btn-start-translation {
+  background: #5cb85c;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 12px 28px;
+  font-size: 20px;
+  font-weight: 400;
+  cursor: pointer;
+  margin-top: 16px;
+}
+
+#jp-status {
+  color: #4cae4c;
+  margin-top: 18px;
+  font-size: 17px;
+}
+
+.footer-container {
+  margin-top: 15px;
+  text-align: center;
+  font-size: 12px;
+  color: #777;
+}
+
+.footer-version,
+.footer-author {
+  margin: 5px;
+}
