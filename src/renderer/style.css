@@ -16,7 +16,8 @@ body {
   margin-bottom: 8px;
 }
 
-#btn-start-translation {
+#btn-start-translation,
+#btn-settings {
   background: #5cb85c;
   color: #fff;
   border: none;
@@ -27,10 +28,23 @@ body {
   cursor: pointer;
   margin-top: 16px;
   transition: background-color 0.3s ease;
+  width: 200px;
 }
 
-#btn-start-translation:hover {
-  background: #4cae4c;
+#btn-settings {
+  background: #337ab7;
+  font-size: 16px;
+  padding: 8px 20px;
+  margin-top: 8px;
+}
+
+#btn-start-translation:hover,
+#btn-settings:hover {
+  opacity: 0.9;
+}
+
+#btn-settings:hover {
+  background: #286090;
 }
 
 #btn-start-translation.selection-mode {

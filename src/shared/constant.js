@@ -9,6 +9,9 @@ const MESSAGES = {
   TRANSLATION_STARTED: "Translation started!",
   TRANSLATION_IN_PROGRESS: "Translation in progress...",
   TRANSLATION_COMPLETED: "Translation completed!",
+  OCR_PROCESSING: "Processing captured text...",
+  TEXT_DETECTED: "Text detected and translated",
+  NO_TEXT_FOUND: "No text found in the selected area",
 };
 const STATUS_MESSAGES = {
   INITIALIZING: "Initializing...",
@@ -19,6 +22,7 @@ const BUTTON_LABELS = {
   START_TRANSLATION: "Start Translation",
   STOP_TRANSLATION: "Stop Translation",
   SELECT_CAPTION_AREA: "Select Caption Area",
+  SETTINGS: "Settings",
   RESET: "Reset",
 };
 const DIALOG_TITLES = {

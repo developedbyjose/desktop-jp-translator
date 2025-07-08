@@ -1,0 +1,114 @@
+body {
+  margin: 0;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  background: #f5f5f5;
+}
+
+.settings-container {
+  max-width: 500px;
+  margin: 0 auto;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  margin-top: 0;
+  color: #333;
+  border-bottom: 2px solid #007acc;
+  padding-bottom: 10px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #555;
+}
+
+select,
+input,
+button {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+button {
+  background: #007acc;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+button:hover {
+  background: #005a9e;
+}
+
+.api-key-group {
+  display: none;
+  margin-top: 10px;
+}
+
+.api-key-group.visible {
+  display: block;
+}
+
+.help-text {
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
+}
+
+.status {
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.status.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.status.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.header-container {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.button-group button {
+  flex: 1;
+}
+
+#cancelButton {
+  background: #6c757d;
+}
+
+#cancelButton:hover {
+  background: #5a6268;
+}

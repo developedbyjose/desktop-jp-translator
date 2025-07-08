@@ -15,6 +15,11 @@ window.addEventListener("DOMContentLoaded", () => {
   btnStartTranslationLabel.textContent = BUTTON_LABELS.START_TRANSLATION;
 
   const btnStartTranslation = document.getElementById("btn-start-translation");
+  const btnSettings = document.getElementById("btn-settings");
+
+  btnSettings.addEventListener("click", () => {
+    ipcRenderer.invoke("open-settings");
+  });
   btnStartTranslation.addEventListener("click", async () => {
     if (!isSelectionMode && !overlayActive) {
       // Start selection mode

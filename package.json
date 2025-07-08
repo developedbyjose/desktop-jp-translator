@@ -11,6 +11,13 @@
   "author": "",
   "license": "ISC",
   "type": "commonjs",
+  "dependencies": {
+    "tesseract.js": "^5.0.5",
+    "@google-cloud/translate": "^8.3.0",
+    "deepl-node": "^1.13.0",
+    "@vitalets/google-translate-api": "^9.2.0",
+    "screenshot-desktop": "^1.12.7"
+  },
   "devDependencies": {
     "electron": "^37.2.0",
     "electron-reload": "^2.0.0-alpha.1"

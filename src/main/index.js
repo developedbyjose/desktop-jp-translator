@@ -1,5 +1,7 @@
 const { app, BrowserWindow, ipcMain, screen } = require("electron");
 const path = require("path");
+const CaptionProcessor = require("./services/captionProcessor");
+const ConfigManager = require("./services/configManager");
 
 require("electron-reload")(__dirname, {
   electron: path.join(
@@ -15,11 +17,14 @@ require("electron-reload")(__dirname, {
 
 let mainWindow;
 let overlayWindow;
+let settingsWindow;
+let captionProcessor;
+let configManager;
 
-const createWindow = () => {
+const createWindow = async () => {
   mainWindow = new BrowserWindow({
     width: 345,
-    height: 270,
+    height: 320,
     resizable: false,
     webPreferences: {
       nodeIntegration: true,
@@ -28,6 +33,23 @@ const createWindow = () => {
   });
 
   mainWindow.loadFile(path.join(__dirname, "../renderer/index.html"));
+
+  // Initialize services
+  configManager = new ConfigManager();
+  await configManager.loadConfig();
+
+  captionProcessor = new CaptionProcessor();
+  await captionProcessor.initialize();
+
+  // Configure translation based on saved settings
+  const config = configManager.getConfig();
+  if (config.translationProvider === "google" && config.googleApiKey) {
+    captionProcessor.configureTranslation("google", config.googleApiKey);
+  } else if (config.translationProvider === "deepl" && config.deeplApiKey) {
+    captionProcessor.configureTranslation("deepl", config.deeplApiKey);
+  } else {
+    captionProcessor.configureTranslation("free");
+  }
 };
 
 const createOverlayWindow = (bounds) => {
@@ -58,6 +80,33 @@ const createOverlayWindow = (bounds) => {
 
   overlayWindow.on("closed", () => {
     overlayWindow = null;
+  });
+};
+
+const createSettingsWindow = () => {
+  if (settingsWindow && !settingsWindow.isDestroyed()) {
+    settingsWindow.focus();
+    return;
+  }
+
+  settingsWindow = new BrowserWindow({
+    width: 600,
+    height: 500,
+    resizable: false,
+    parent: mainWindow,
+    modal: true,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
+  });
+
+  settingsWindow.loadFile(
+    path.join(__dirname, "../renderer/windows/settings/settings.html")
+  );
+
+  settingsWindow.on("closed", () => {
+    settingsWindow = null;
   });
 };
 
@@ -106,10 +155,26 @@ ipcMain.handle("start-selection", async () => {
 
 ipcMain.handle("create-overlay", async (event, bounds) => {
   createOverlayWindow(bounds);
+
+  // Start caption processing
+  if (captionProcessor) {
+    await captionProcessor.startMonitoring(bounds, (textData) => {
+      // Send translation updates to the overlay window
+      if (overlayWindow && !overlayWindow.isDestroyed()) {
+        overlayWindow.webContents.send("text-update", textData);
+      }
+    });
+  }
+
   return true;
 });
 
 ipcMain.handle("destroy-overlay", async () => {
+  // Stop caption processing
+  if (captionProcessor) {
+    captionProcessor.stopMonitoring();
+  }
+
   if (overlayWindow) {
     overlayWindow.destroy();
     overlayWindow = null;
@@ -117,4 +182,68 @@ ipcMain.handle("destroy-overlay", async () => {
   return true;
 });
 
+// Handle translation configuration
+ipcMain.handle("configure-translation", async (event, provider, apiKey) => {
+  if (captionProcessor) {
+    captionProcessor.configureTranslation(provider, apiKey);
+  }
+  return true;
+});
+
+// Handle capture interval changes
+ipcMain.handle("set-capture-interval", async (event, interval) => {
+  if (captionProcessor) {
+    captionProcessor.setCaptureInterval(interval);
+  }
+  return true;
+});
+
+// Handle settings window
+ipcMain.handle("open-settings", async () => {
+  createSettingsWindow();
+  return true;
+});
+
+// Handle configuration
+ipcMain.handle("get-config", async () => {
+  return configManager ? configManager.getConfig() : {};
+});
+
+ipcMain.handle("update-config", async (event, updates) => {
+  if (configManager) {
+    const config = await configManager.updateConfig(updates);
+
+    // Update caption processor with new settings
+    if (captionProcessor) {
+      if (config.translationProvider === "google" && config.googleApiKey) {
+        captionProcessor.configureTranslation("google", config.googleApiKey);
+      } else if (config.translationProvider === "deepl" && config.deeplApiKey) {
+        captionProcessor.configureTranslation("deepl", config.deeplApiKey);
+      } else {
+        captionProcessor.configureTranslation("free");
+      }
+
+      if (config.captureInterval) {
+        captionProcessor.setCaptureInterval(config.captureInterval);
+      }
+    }
+
+    return config;
+  }
+  return {};
+});
+
+ipcMain.handle("test-translation", async (event, testText) => {
+  if (captionProcessor && captionProcessor.translationService) {
+    return await captionProcessor.translationService.translateText(testText);
+  }
+  return "Translation service not available";
+});
+
 app.whenReady().then(createWindow);
+
+app.on("before-quit", async () => {
+  if (captionProcessor) {
+    await captionProcessor.cleanup();
+  }
+});
