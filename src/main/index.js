@@ -75,7 +75,7 @@ const createOverlayWindow = (bounds) => {
   });
 
   overlayWindow.loadFile(
-    path.join(__dirname, "../renderer/pages/overlay.html")
+    path.join(__dirname, "../renderer/windows/overlay/overlay.html")
   );
 
   overlayWindow.on("closed", () => {
@@ -130,7 +130,7 @@ const createSelectionWindow = () => {
   });
 
   selectionWindow.loadFile(
-    path.join(__dirname, "../renderer/pages/selection.html")
+    path.join(__dirname, "../renderer/windows/selection/selection.html")
   );
 
   return selectionWindow;
