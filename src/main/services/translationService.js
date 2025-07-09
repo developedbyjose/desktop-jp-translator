@@ -1,5 +1,5 @@
 const { Translate } = require("@google-cloud/translate").v2;
-const translate = require("@vitalets/google-translate-api");
+const { translate } = require("@vitalets/google-translate-api");
 const deepl = require("deepl-node");
 
 class TranslationService {
