@@ -55,14 +55,6 @@ Make sure you have Node.js and npm installed on your system.
 
 ---
 
-## Usage
-
-_(This section is a placeholder for you to fill in as you complete the project.)_
-
-Once the application is running, [explain how to use it... e.g., select the application window to monitor, choose the target language, etc.].
-
----
-
 ## License
 
 Distributed under the ISC License.
