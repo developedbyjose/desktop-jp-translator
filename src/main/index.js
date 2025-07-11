@@ -114,7 +114,7 @@ const createOverlayWindow = (selectionBounds) => {
     alwaysOnTop: true,
     skipTaskbar: true,
     resizable: false,
-    movable: false,
+    movable: true, // Enable dragging
     focusable: false, // Prevent focus to avoid interfering with capture
     webPreferences: {
       nodeIntegration: true,
@@ -303,6 +303,14 @@ ipcMain.handle("test-translation", async (event, testText) => {
     return await captionProcessor.translationService.translateText(testText);
   }
   return "Translation service not available";
+});
+
+ipcMain.handle("move-overlay-window", async (event, position) => {
+  if (overlayWindow && !overlayWindow.isDestroyed()) {
+    overlayWindow.setPosition(position.x, position.y);
+    return true;
+  }
+  return false;
 });
 
 app.whenReady().then(createWindow);

@@ -22,6 +22,30 @@ body {
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   position: relative;
+  cursor: move; /* Show move cursor on entire overlay */
+}
+
+.drag-handle {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  color: #007acc;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: move;
+  padding: 4px 6px;
+  border-radius: 4px;
+  background: rgba(0, 122, 204, 0.3);
+  user-select: none;
+  z-index: 100;
+  border: 1px solid rgba(0, 122, 204, 0.5);
+  transition: all 0.2s ease;
+}
+
+.drag-handle:hover {
+  background: rgba(0, 122, 204, 0.6);
+  color: white;
+  transform: scale(1.1);
 }
 
 .overlay-content::after {
