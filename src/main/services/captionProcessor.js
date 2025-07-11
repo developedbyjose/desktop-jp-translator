@@ -1,10 +1,12 @@
 const OCRService = require("./ocrService");
 const TranslationService = require("./translationService");
+const CaptureService = require("./captureService");
 
 class CaptionProcessor {
   constructor() {
     this.ocrService = new OCRService();
     this.translationService = new TranslationService();
+    this.captureService = CaptureService;
     this.isRunning = false;
     this.intervalId = null;
     this.lastCapturedText = "";
@@ -42,28 +44,40 @@ class CaptionProcessor {
     if (!this.isRunning || !this.bounds) return;
 
     try {
-      // Extract text from the screen area
-      const extractedText = await this.ocrService.captureAndExtractText(
+      // Small delay to ensure overlay is positioned and stable
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // 1. Capture only the selected area
+      const croppedImageBuffer = await this.captureService.captureSelectedArea(
         this.bounds
       );
 
-      // Only process if text has changed significantly
-      if (this.hasTextChanged(extractedText)) {
-        console.log("New text detected:", extractedText);
+      // 2. Extract text from the cropped image
+      const ocrResult = await this.ocrService.extractText(croppedImageBuffer);
 
-        // Translate the text
+      if (!ocrResult.success || !ocrResult.text) {
+        console.log("No text found in selected area");
+        return;
+      }
+
+      // Only process if text has changed significantly
+      if (this.hasTextChanged(ocrResult.text)) {
+        console.log("New text detected:", ocrResult.text);
+
+        // 3. Translate the text
         const translatedText = await this.translationService.translateText(
-          extractedText
+          ocrResult.text
         );
 
         // Update the last captured text
-        this.lastCapturedText = extractedText;
+        this.lastCapturedText = ocrResult.text;
 
         // Send update to the UI
         if (this.onTextUpdate) {
           this.onTextUpdate({
-            original: extractedText,
+            original: ocrResult.text,
             translated: translatedText,
+            confidence: ocrResult.confidence,
             timestamp: new Date().toISOString(),
           });
         }

@@ -52,22 +52,70 @@ const createWindow = async () => {
   }
 };
 
-const createOverlayWindow = (bounds) => {
+const calculateOverlayPosition = (selectionBounds) => {
+  const displays = screen.getAllDisplays();
+  const primaryDisplay =
+    displays.find((d) => d.id === screen.getPrimaryDisplay().id) || displays[0];
+  const screenBounds = primaryDisplay.bounds;
+
+  // Overlay dimensions
+  const overlayWidth = Math.max(300, selectionBounds.width);
+  const overlayHeight = 120;
+  const padding = 10;
+
+  // Try to position above the selection first
+  let overlayX = selectionBounds.x;
+  let overlayY = selectionBounds.y - overlayHeight - padding;
+
+  // Adjust horizontal position to stay within screen
+  if (overlayX + overlayWidth > screenBounds.width) {
+    overlayX = screenBounds.width - overlayWidth - padding;
+  }
+  if (overlayX < 0) {
+    overlayX = padding;
+  }
+
+  // If overlay would go above screen, position below selection
+  if (overlayY < 0) {
+    overlayY = selectionBounds.y + selectionBounds.height + padding;
+  }
+
+  // If still doesn't fit below, position at bottom of screen
+  if (overlayY + overlayHeight > screenBounds.height) {
+    overlayY = screenBounds.height - overlayHeight - padding;
+  }
+
+  return {
+    x: Math.max(0, overlayX),
+    y: Math.max(0, overlayY),
+    width: overlayWidth,
+    height: overlayHeight,
+  };
+};
+
+const createOverlayWindow = (selectionBounds) => {
   if (overlayWindow) {
     overlayWindow.destroy();
   }
 
+  // Calculate smart overlay position to avoid interfering with capture
+  const overlayBounds = calculateOverlayPosition(selectionBounds);
+
+  console.log("Selection bounds:", selectionBounds);
+  console.log("Overlay positioned at:", overlayBounds);
+
   overlayWindow = new BrowserWindow({
-    x: bounds.x,
-    y: bounds.y,
-    width: bounds.width,
-    height: bounds.height,
+    x: overlayBounds.x,
+    y: overlayBounds.y,
+    width: overlayBounds.width,
+    height: overlayBounds.height,
     frame: false,
     transparent: true,
     alwaysOnTop: true,
     skipTaskbar: true,
     resizable: false,
     movable: false,
+    focusable: false, // Prevent focus to avoid interfering with capture
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -80,6 +128,11 @@ const createOverlayWindow = (bounds) => {
 
   overlayWindow.on("closed", () => {
     overlayWindow = null;
+  });
+
+  // Pass selection bounds to overlay for visual indication
+  overlayWindow.webContents.once("did-finish-load", () => {
+    overlayWindow.webContents.send("set-selection-bounds", selectionBounds);
   });
 };
 
@@ -154,19 +207,31 @@ ipcMain.handle("start-selection", async () => {
 });
 
 ipcMain.handle("create-overlay", async (event, bounds) => {
-  createOverlayWindow(bounds);
+  try {
+    console.log("Selected area bounds:", bounds);
 
-  // Start caption processing
-  if (captionProcessor) {
-    await captionProcessor.startMonitoring(bounds, (textData) => {
-      // Send translation updates to the overlay window
-      if (overlayWindow && !overlayWindow.isDestroyed()) {
-        overlayWindow.webContents.send("text-update", textData);
-      }
-    });
+    // Validate bounds
+    if (!bounds || bounds.width < 10 || bounds.height < 10) {
+      throw new Error("Selected area too small");
+    }
+
+    createOverlayWindow(bounds);
+
+    // Start caption processing with the new improved capture
+    if (captionProcessor) {
+      await captionProcessor.startMonitoring(bounds, (textData) => {
+        // Send translation updates to the overlay window
+        if (overlayWindow && !overlayWindow.isDestroyed()) {
+          overlayWindow.webContents.send("text-update", textData);
+        }
+      });
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error creating overlay:", error);
+    return { success: false, error: error.message };
   }
-
-  return true;
 });
 
 ipcMain.handle("destroy-overlay", async () => {

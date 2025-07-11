@@ -5,6 +5,7 @@
   "main": "src/main/index.js",
   "scripts": {
     "start": "electron .",
+    "dev": "NODE_ENV=development electron .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -16,7 +17,8 @@
     "@google-cloud/translate": "^8.3.0",
     "deepl-node": "^1.13.0",
     "@vitalets/google-translate-api": "^9.2.0",
-    "screenshot-desktop": "^1.12.7"
+    "screenshot-desktop": "^1.12.7",
+    "sharp": "^0.33.0"
   },
   "devDependencies": {
     "electron": "^37.2.0",
